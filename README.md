@@ -3,6 +3,15 @@
 A World of Warcraft: Forever addon that tells you in an item's tooltip which quests the item belongs to - and, once
 those quests are done, asks whether the leftover quest item can go.
 
+> # ⚠️ DISCLAIMER: PROCEDURAL DATA, NOT CURATED
+> **Everything this addon shows is generated automatically.** The item-to-quest links are computed at login from the
+> quest database of QuestieDB; nobody has checked them by hand, item by item.
+>
+> - A quest can be **missing** from an item, and an item can be listed for a quest it is **not really needed** for.
+> - "Completed", "Not started" and "no longer needed" are conclusions drawn from that data, **not verified facts**.
+> - The delete question is a **suggestion**. Nothing is ever deleted without your click, and a deleted quest item
+>   may be impossible to get back - **when in doubt, press Keep.**
+
 ## Tooltip
 Every item tooltip gets one line per quest, with the state of that quest on the right:
 

@@ -1,0 +1,10 @@
+## Interface: 16001
+## Title: Quest Item Tip
+## Notes: Shows in an item's tooltip which quests the item belongs to - needed for, starts or handed out by a quest - and whether that quest is in your log, not started yet or already done. After a quest is handed in it asks whether to delete quest items that are left over. /qit
+## Author: HexToolFactory
+## Version: @project-version@
+## Category: Quests
+## OptionalDeps: QuestieDB
+## SavedVariables: QuestItemTipDB
+
+Core.lua

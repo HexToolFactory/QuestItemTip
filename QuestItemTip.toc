@@ -4,6 +4,7 @@
 ## Author: HexToolFactory
 ## Version: @project-version@
 ## Category: Quests
+## X-Curse-Project-ID: 1803390
 ## OptionalDeps: QuestieDB
 ## SavedVariables: QuestItemTipDB
 

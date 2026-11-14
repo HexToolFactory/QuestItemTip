@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+- Fix: the Delete button tried to destroy every stack of a leftover quest item in one click. The game allows one
+  delete per click and blocked the rest. Delete now destroys one stack per click and stays open, counting down,
+  until all are gone.
+
 ## 0.2.0
 - First public version for WoW: Forever.
 - Item tooltips name the quests an item belongs to: needed for, used for, provided for, starts or related to a quest.

@@ -575,24 +575,59 @@ end
 
 local ShowNextPrompt
 
--- Runs inside the click on "Delete": the game only lets an item be destroyed from a key press or click.
-local function DeleteFromBags(itemId, link)
-  for _, pos in ipairs(BagSlots(itemId)) do
-    ClearCursor()
-    C_Container.PickupContainerItem(pos.bag, pos.slot)
-    local kind, id = GetCursorInfo()
-    if not IsSecret(kind) and kind == "item" and PlainNumber(id) == itemId then
-      DeleteCursorItem()
-      if GetCursorInfo() ~= nil then
-        -- Still on the cursor: the game refused. It stays there so it can be dropped by hand.
-        db.diag.deleteRefused = time()
-        Print(("the game did not let the addon delete %s. It is on your cursor: click on the ground to destroy it, or right-click to put it back."):format(link))
-        return
+-- Runs inside the click on "Delete". The game lets an item be destroyed only from a key press or click, and one
+-- click pays for one delete: a second DeleteCursorItem in the same click is blocked. So this destroys one stack.
+-- entry.gone remembers the slots already destroyed, the bags may not show it yet at the next click.
+-- Returns "deleted", "refused" (the item stays on the cursor) or "none", and the number of slots still to do.
+local function DeleteOneStack(entry)
+  local result, left = "none", 0
+  entry.gone = entry.gone or {}
+  for _, pos in ipairs(BagSlots(entry.itemId)) do
+    local key = pos.bag * 1000 + pos.slot
+    if not entry.gone[key] then
+      if result ~= "none" then
+        left = left + 1
+      else
+        ClearCursor()
+        C_Container.PickupContainerItem(pos.bag, pos.slot)
+        local kind, id = GetCursorInfo()
+        if not IsSecret(kind) and kind == "item" and PlainNumber(id) == entry.itemId then
+          DeleteCursorItem()
+          if GetCursorInfo() ~= nil then
+            result, left = "refused", left + 1
+          else
+            result = "deleted"
+            entry.gone[key] = true
+          end
+        else
+          ClearCursor()   -- locked or moved: not this click
+          left = left + 1
+        end
       end
-    else
-      ClearCursor()
     end
   end
+  return result, left
+end
+
+local function OnDeleteClick(frame)
+  local current = asking
+  if not current then frame:Hide() return end
+  local result, left = DeleteOneStack(current)
+  if result == "deleted" then current.deleted = (current.deleted or 0) + 1 end
+  db.diag.lastDelete = { item = current.itemId, result = result, left = left, deleted = current.deleted or 0, at = time() }
+
+  if result == "deleted" and left > 0 then
+    frame.delete:SetText(("Delete (%d left)"):format(left))   -- stays open: one more click per stack
+    return
+  end
+  frame:Hide()
+  if result == "refused" then
+    -- Still on the cursor. It stays there so it can be dropped by hand.
+    db.diag.deleteRefused = time()
+    Print(("the game refused to delete %s. It is on your cursor: click the ground to destroy it, right-click to put it back."):format(current.link))
+    return
+  end
+  local itemId, link = current.itemId, current.link
   C_Timer.After(1.5, function()
     if #BagSlots(itemId) == 0 then
       Print(("deleted %s"):format(link))
@@ -641,11 +676,7 @@ local function CreatePrompt()
   frame.delete:SetSize(120, 22)
   frame.delete:SetPoint("BOTTOMRIGHT", frame, "BOTTOM", -6, 18)
   frame.delete:SetText("Delete")
-  frame.delete:SetScript("OnClick", function()
-    local current = asking
-    frame:Hide()
-    if current then DeleteFromBags(current.itemId, current.link) end
-  end)
+  frame.delete:SetScript("OnClick", function() OnDeleteClick(frame) end)
 
   frame.keep = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
   frame.keep:SetSize(120, 22)
@@ -656,7 +687,8 @@ local function CreatePrompt()
     frame:Hide()
   end)
 
-  frame:SetScript("OnHide", function()
+  frame:SetScript("OnHide", function(self)
+    if self:IsShown() then return end   -- only the UI was hidden (Alt+Z, cinematic): it comes back with it
     asking = nil
     C_Timer.After(0.3, function() ShowNextPrompt() end)
   end)
@@ -676,6 +708,8 @@ ShowNextPrompt = function()
       local link = info.link or info.name
       local count = ItemCount(entry.itemId)
       asking = { itemId = entry.itemId, link = link }
+      local stacks = #BagSlots(entry.itemId)
+      prompt.delete:SetText(stacks > 1 and ("Delete (%d left)"):format(stacks) or "Delete")
       prompt.icon:SetTexture(info.icon)
       prompt.text:SetText(("You completed |cffffd100%s|r.\n\n%s%s belongs to no quest you still have open. Delete it?"):format(
         QuestTitle(entry.questId or doneQuest), link, count and count > 1 and (" x" .. count) or ""))

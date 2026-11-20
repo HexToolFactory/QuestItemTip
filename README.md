@@ -35,12 +35,13 @@ whether to delete them. It only asks when it is sure the item is finished:
 - every quest it belongs to is completed or closed to your character,
 - none of its quests is in your log, not started yet or repeatable.
 
-**Delete** destroys every stack of it in your bags, **Keep** never asks about that item again, **Escape** asks again
+**Delete** destroys one stack per click and stays open until all are gone, **Keep** never asks about that item again, **Escape** asks again
 next time. The question never appears in combat.
 
 ## Requirements
-The quest data comes from **QuestieDB**, the database addon that ships with [Questie](https://www.curseforge.com/wow/addons/questie).
-Without it the tooltip only knows the objectives of quests in your log, and the delete question is never asked.
+**[QuestieDB](https://www.curseforge.com/wow/addons/questiedb)** - a separate addon with the quest data. The CurseForge
+app installs it together with Quest Item Tip. Questie is not needed.
+Without QuestieDB the tooltip only knows the objectives of quests in your log, and the delete question is never asked.
 
 ## Commands
 - `/qit` - status and all commands

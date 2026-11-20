@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.2
+- QuestieDB is now a required dependency on CurseForge. The CurseForge app installs it with Quest Item Tip.
+  QuestieDB is a separate addon; it does not come with Questie, and Questie is not needed.
+- The addon itself is unchanged and still runs without QuestieDB, with less: only quests in your log, no delete question.
+
 ## 0.2.1
 - Fix: the Delete button tried to destroy every stack of a leftover quest item in one click. The game allows one
   delete per click and blocked the rest. Delete now destroys one stack per click and stays open, counting down,
